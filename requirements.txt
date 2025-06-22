@@ -1,0 +1,9 @@
+streamlit
+langchain
+google-generativeai
+requests
+dotenv
+python-dotenv
+requests
+langchain_google_genai
+feedparser
