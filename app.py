@@ -1,44 +1,56 @@
 import streamlit as st
-from news.fetch_news import get_top_news
+from news.fetch_hindu import get_hindu_articles
 from chains.summarizer_chain import summarize_article
 from chains.question_chain import generate_questions
+from chains.classifier_chain import classify_topic
 
 st.set_page_config(page_title="UPSC News Companion", layout="wide")
-st.title("📰 UPSC News Companion")
-st.markdown("Get summaries and questions from the latest news, optimized for UPSC preparation.")
+st.title("📚 UPSC News Companion")
+st.markdown("Get categorized summaries and MCQs from the latest news for UPSC preparation.")
 
-# Fetch top 5 news articles
-with st.spinner("Fetching latest news..."):
-    articles = get_top_news()
+# Fetch articles
+with st.spinner("Fetching and analyzing top news from The Hindu..."):
+    articles = get_hindu_articles()
 
 if not articles:
-    st.warning("⚠️ No articles found. Please check your NewsAPI key or try again later.")
+    st.warning("⚠️ No articles found.")
 else:
-    for idx, article in enumerate(articles, 1):
-        title = article.get("title", "Untitled")
-        content = (
-            article.get("content") or
-            article.get("description") or
-            article.get("summary") or
-            ""
-        )
+    category_map = {
+        "Indian Polity": [],
+        "Indian Economy": [],
+        "International Relations": [],
+        "Social Issues": [],
+        "Other": []
+    }
 
-        with st.expander(f"🔹 {idx}. {title}", expanded=False):
-            st.markdown(f"**🔗 Source:** [Read more]({article.get('url', '#')})")
+    for article in articles:
+        title = article["title"]
+        link = article["link"]
+        content = article["content"]
 
-            with st.spinner("Generating summary..."):
-                try:
-                    summary = summarize_article(content)
-                    st.subheader("📝 Summary")
-                    st.markdown(summary.strip())
-                except Exception as e:
-                    st.error(f"Error generating summary: {e}")
-                    continue
+        try:
+            summary = summarize_article(content)
+            questions = generate_questions(summary)
+            category = classify_topic(content)
+        except Exception as e:
+            st.error(f"⚠️ Error processing article: {title}\n{e}")
+            continue
 
-            with st.spinner("Generating UPSC-style questions..."):
-                try:
-                    questions = generate_questions(summary)
-                    st.subheader("❓ Questions")
-                    st.markdown(questions.strip())
-                except Exception as e:
-                    st.error(f"Error generating questions: {e}")
+        category = category if category in category_map else "Other"
+        category_map[category].append({
+            "title": title,
+            "summary": summary,
+            "questions": questions,
+            "link": link
+        })
+
+    # Display categorized output
+    for cat, items in category_map.items():
+        if items:
+            with st.expander(f"📘 {cat} ({len(items)} articles)", expanded=False):
+                for idx, item in enumerate(items, 1):
+                    st.markdown(f"### {idx}. {item['title']}")
+                    st.markdown(f"🔗 [Read Full Article]({item['link']})")
+                    st.markdown(f"**📝 Summary:**\n{item['summary'].strip()}")
+                    st.markdown(f"**❓ Questions:**\n{item['questions'].strip()}")
+                    st.markdown("---")
