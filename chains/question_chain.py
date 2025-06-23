@@ -13,8 +13,13 @@ question_prompt = PromptTemplate(
     input_variables=["summary"],
     template="""
 You are a UPSC exam expert. Based on the following news summary, create **2 UPSC-level multiple-choice questions (MCQs)**.
-Each should include 4 options and clearly mark the correct one.
+Each should include 4 options use this format and clearly mark the correct one.
 
+Which of the following is true
+A. can read a string with newline characters but a normal scanf() with %s can not.
+B. can read a string with spaces but a normal scanf() with %s can not.
+C. can always replace scanf() without any additional code.
+D. None of the above
 If information is partial, extrapolate from context with care.
 
 Summary:

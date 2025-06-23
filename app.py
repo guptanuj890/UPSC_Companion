@@ -22,7 +22,9 @@ else:
         "Social Issues": [],
         "Other": []
     }
-
+    questions_list=[]
+    summary_list=[]
+    category_list=[]
     for article in articles:
         title = article["title"]
         link = article["link"]
@@ -32,6 +34,11 @@ else:
             summary = summarize_article(content)
             questions = generate_questions(summary)
             category = classify_topic(content)
+
+            summary_list.append(summary)
+            questions_list.append(questions)
+            category_list.append(category)
+
         except Exception as e:
             st.error(f"⚠️ Error processing article: {title}\n{e}")
             continue
@@ -40,7 +47,6 @@ else:
         category_map[category].append({
             "title": title,
             "summary": summary,
-            "questions": questions,
             "link": link
         })
 
@@ -52,5 +58,6 @@ else:
                     st.markdown(f"### {idx}. {item['title']}")
                     st.markdown(f"🔗 [Read Full Article]({item['link']})")
                     st.markdown(f"**📝 Summary:**\n{item['summary'].strip()}")
-                    st.markdown(f"**❓ Questions:**\n{item['questions'].strip()}")
                     st.markdown("---")
+    for questions in questions_list:
+        st.markdown(questions)
