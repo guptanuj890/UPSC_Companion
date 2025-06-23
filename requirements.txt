@@ -9,4 +9,4 @@ langchain_google_genai
 feedparser
 newspaper3k
 lxml[html_clean]
-
+newsapi-python

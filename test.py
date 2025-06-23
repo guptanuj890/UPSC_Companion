@@ -1,25 +1,15 @@
-import os
-import requests
+from newsapi import NewsApiClient
+import os 
 from dotenv import load_dotenv
 
 load_dotenv()
-api_key = os.getenv("NEWS_API_KEY")
+api_key=os.getenv("api_key")
+newsapi = NewsApiClient(api_key=api_key)
+top_headlines = newsapi.get_top_headlines(language='en', category='general', page_size=10)
 
-if not api_key:
-    print("❌ NEWS_API_KEY not found in .env")
-    exit()
-
-url = f"https://newsapi.org/v2/everything?q=india&language=en&sortBy=publishedAt&pageSize=5&apiKey={api_key}"
-response = requests.get(url)
-data = response.json()
-
-if response.status_code != 200:
-    print(f"❌ API request failed: {data.get('message')}")
-    exit()
-
-articles = data.get("articles", [])
-if not articles:
-    print("⚠️ No articles found. Check filters, rate limit, or API key.")
+print("Top 10  News Headlines:")
+if top_headlines and top_headlines['articles']:
+    for article in top_headlines['articles']:
+        print(f"- {article['title']}: {article['url']} :{article['content']}")
 else:
-    print("✅ Sample article:")
-    print(articles[0]['title'])
+    print("Could not retrieve top headlines for politics.")
